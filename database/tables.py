@@ -22,12 +22,15 @@ class RefreshToken(Table, tablename="refresh_tokens", db=DB):
 
 
 class FriendRequest(Table, db=DB):
-    name = Varchar(length=100)
-    popularity = Integer()
+    requestor = UUID()
+    requestor_local_ref_for_requestee = UUID()
+    requestee = UUID()
 
 class FriendConnection(Table, db=DB):
-    friend1 = UUID()
-    friend2 = UUID()
+    friend_a = UUID()
+    a_local_ref_for_b = UUID()
+    friend_b = UUID()
+    b_local_ref_for_a = UUID()
 
 class Match(Table, db=DB):
     id = UUID(primary_key=True, default=uuid.uuid4)

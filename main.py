@@ -6,6 +6,7 @@ from litestar.middleware import DefineMiddleware
 from api.auth.controller import AuthController
 from api.auth.middleware import JWTAuthMiddleware
 from api.auth.models import AuthUser
+from api.friend.controller import FriendController
 from api.match.controller import MatchController
 from piccolo_conf import DB
 
@@ -29,11 +30,11 @@ async def me(request: Request[AuthUser, str, Any]) -> AuthUser:
 
 
 app = Litestar(
-    route_handlers=[index, AuthController, me, MatchController],
+    route_handlers=[index, AuthController, me, MatchController, FriendController],
     middleware=[
         DefineMiddleware(
             JWTAuthMiddleware,
-            exclude=[r"^/auth/(login|register|refresh|logout)$", r"^/schema", r"^/$"],
+            exclude=[r"^/schema", r"^/$"],
         )
     ],
     on_startup=[open_db_connection],

@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 @dataclass
 class AuthUser:
     id: str
-    email: str
 
 @dataclass
 class LoginRequest:

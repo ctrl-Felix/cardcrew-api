@@ -20,6 +20,14 @@ class JWTAuthMiddleware(AbstractAuthenticationMiddleware):
 
         token = auth_header[len("Bearer "):]
 
+        # Temporary solution
+        user = await UserTable.objects().get(UserTable.device_token == token).run()
+        if not user:
+            raise NotAuthorizedException()
+        print(user)
+        return AuthenticationResult(user=AuthUser(id=str(user.id)), auth=token)
+
+
         try:
             payload = jwt.decode(token, AppConfig.JWT_SECRET, algorithms=["HS256"])
         except jwt.PyJWTError:
@@ -34,9 +42,9 @@ class JWTAuthMiddleware(AbstractAuthenticationMiddleware):
         except ValueError:
             raise NotAuthorizedException()
 
-        users = await UserTable.objects().where(UserTable.id == user_uuid)
+        users = await UserTable.objects().get(UserTable.id == user_uuid)
         if not users:
             raise NotAuthorizedException()
 
-        db_user = users[0]
-        return AuthenticationResult(user=AuthUser(id=str(db_user.id), email=db_user.email), auth=token)
+        db_user = users
+        return AuthenticationResult(user=AuthUser(id=str(db_user.id), email="PLACEHOLDER"), auth=token)
