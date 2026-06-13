@@ -5,7 +5,7 @@ from litestar.contrib.piccolo import PiccoloDTO
 from litestar.exceptions import NotFoundException
 from piccolo.table import Table
 
-from api.friend.models import FriendRequestBody
+from api.friend.models import FriendRequestBody, ParsedFriendRequest, FriendRequestsResponse
 from database.tables import User, FriendRequest
 
 
@@ -38,3 +38,21 @@ class FriendController(Controller):
         ))
 
         return
+
+    @get("/friend-request")
+    async def get_friend_requests(self, request: Request) -> FriendRequestsResponse:
+        friend_requests = await FriendRequest.objects().where(FriendRequest.requestee == request.user.id).run()
+
+        parsed_friend_requests = []
+        for fr in friend_requests:
+            requestor = await User.objects().get(User.id == fr.requestor).run()
+            if not requestor:
+                continue
+            parsed_friend_requests.append(ParsedFriendRequest(
+                requestorId=str(fr.requestor),
+                requestorName=requestor.name
+            ))
+
+        return FriendRequestsResponse(
+            friend_requests=parsed_friend_requests
+        )
