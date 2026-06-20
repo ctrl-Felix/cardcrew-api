@@ -6,6 +6,7 @@ from litestar.dto import DTOConfig
 
 @dataclass
 class FriendRequestBody:
+    requestorName: str
     friend_request_token: str
     local_reference_uuid: str
 
@@ -15,5 +16,10 @@ class ParsedFriendRequest:
     requestorId: str
 
 @dataclass
+class ParsedSentFriendRequest:
+    localRequesteeId: str
+
+@dataclass
 class FriendRequestsResponse:
-    friend_requests: list[ParsedFriendRequest]
+    incoming_friend_requests: list[ParsedFriendRequest]
+    sent_friend_requests: list[ParsedSentFriendRequest]

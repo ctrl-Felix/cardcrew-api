@@ -5,7 +5,7 @@ from litestar.contrib.piccolo import PiccoloDTO
 from litestar.exceptions import NotFoundException
 from piccolo.table import Table
 
-from api.friend.models import FriendRequestBody, ParsedFriendRequest, FriendRequestsResponse
+from api.friend.models import FriendRequestBody, ParsedFriendRequest, FriendRequestsResponse, ParsedSentFriendRequest
 from database.tables import User, FriendRequest
 
 
@@ -27,11 +27,11 @@ class FriendController(Controller):
 
         # Check the frt exists
         requestee = await User.objects().get(User.friend_request_token == data.friend_request_token).run()
-        print(data)
         if not requestee:
             raise NotFoundException()
 
         await FriendRequest.insert(FriendRequest(
+            requestor_name=data.requestorName,
             requestor=request.user.id,
             requestor_local_ref_for_requestee=data.local_reference_uuid,
             requestee=requestee.id
@@ -39,20 +39,35 @@ class FriendController(Controller):
 
         return
 
+    @post("/accept-friend-request")
+    async def accept_friend_request(self, data: FriendRequestBody, request: Request) -> None:
+        return
+
+
     @get("/friend-request")
     async def get_friend_requests(self, request: Request) -> FriendRequestsResponse:
-        friend_requests = await FriendRequest.objects().where(FriendRequest.requestee == request.user.id).run()
+        friend_requests = await FriendRequest.objects().where(FriendRequest.requestee == str(request.user.id)).run()
 
         parsed_friend_requests = []
         for fr in friend_requests:
             requestor = await User.objects().get(User.id == fr.requestor).run()
             if not requestor:
                 continue
+
             parsed_friend_requests.append(ParsedFriendRequest(
                 requestorId=str(fr.requestor),
-                requestorName=requestor.name
+                requestorName=fr.requestor_name
             ))
 
+        parsed_sent_friend_requests = []
+        sent_friend_requests = await FriendRequest.objects().where(FriendRequest.requestor == request.user.id).run()
+        for fr in sent_friend_requests:
+            parsed_sent_friend_requests.append(ParsedSentFriendRequest(
+                localRequesteeId=str(fr.requestor_local_ref_for_requestee),
+            ))
+
+
         return FriendRequestsResponse(
-            friend_requests=parsed_friend_requests
+            incoming_friend_requests=parsed_friend_requests,
+            sent_friend_requests=parsed_sent_friend_requests
         )

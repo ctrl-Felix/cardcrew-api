@@ -23,6 +23,7 @@ class RefreshToken(Table, tablename="refresh_tokens", db=DB):
 
 class FriendRequest(Table, db=DB):
     requestor = UUID()
+    requestor_name = Varchar(length=255)
     requestor_local_ref_for_requestee = UUID()
     requestee = UUID()
 

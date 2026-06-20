@@ -26,8 +26,7 @@ class JWTAuthMiddleware(AbstractAuthenticationMiddleware):
             raise NotAuthorizedException()
         print(user)
         return AuthenticationResult(user=AuthUser(id=str(user.id)), auth=token)
-
-
+        
         try:
             payload = jwt.decode(token, AppConfig.JWT_SECRET, algorithms=["HS256"])
         except jwt.PyJWTError:
