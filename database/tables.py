@@ -1,7 +1,7 @@
 import datetime
 import uuid
 
-from piccolo.columns import Integer, Varchar
+from piccolo.columns import Integer, Varchar, Boolean
 from piccolo.columns.column_types import Timestamptz, UUID
 from piccolo.table import Table
 
@@ -33,15 +33,35 @@ class FriendConnection(Table, db=DB):
     friend_b = UUID()
     b_local_ref_for_a = UUID()
 
+# These tables are replicates from the local databases and therefore camelcase
 class Match(Table, db=DB):
     id = UUID(primary_key=True, default=uuid.uuid4)
     title = Varchar(length=100)
+    description = Varchar(length=255)
+    status = Varchar(length=32)
+    createdAt = Timestamptz()
+    lastUpdated=Timestamptz(default=datetime.datetime.now)
+
+class LocalPlayer(Table, db=DB):
+    id = UUID(primary_key=True, default=uuid.uuid4)
+    belongsToUserId = UUID()
+    name = Varchar(length=100)
+    lastUpdated=Timestamptz(default=datetime.datetime.now)
 
 class MatchParticipants(Table, db=DB):
     id = UUID(primary_key=True, default=uuid.uuid4)
-    user_id = UUID()
+    matchId = UUID()
+    playerId = UUID()
+    createdAt = Timestamptz()
+    isHidden = Boolean()
+    lastUpdated=Timestamptz(default=datetime.datetime.now)
 
 class MatchRound(Table, db=DB):
     id = UUID(primary_key=True, default=uuid.uuid4)
-    user_id = UUID()
+    matchId = UUID()
+    playerId = UUID()
+    roundId = Integer()
     score = Integer()
+    createdAt = Timestamptz()
+    lastUpdated=Timestamptz(default=datetime.datetime.now)
+
